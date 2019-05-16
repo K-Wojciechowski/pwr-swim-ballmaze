@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="_unit_">1dp</dimen>
+    <dimen name="title_size">56dp</dimen>
+    <dimen name="big_text_size">40dp</dimen>
+    <dimen name="objective_title_size">20dp</dimen>
+    <dimen name="objective_text_size">14dp</dimen>
+    <dimen name="ball_size">20dp</dimen>
+    <dimen name="gap_width">70dp</dimen>
+    <dimen name="gap_margin_size">8dp</dimen>
+    <dimen name="ball_margin_size">2dp</dimen>
+    <dimen name="ball_from_top">40dp</dimen>
+    <dimen name="title_position">50dp</dimen>
+    <dimen name="objective_title_position">116dp</dimen>
+    <dimen name="objective_position">126dp</dimen>
+    <dimen name="text_margin">8dp</dimen>
+    <dimen name="gameover_title_position">116dp</dimen>
+    <dimen name="gameover_score_position">166dp</dimen>
+    <dimen name="first_floor_height">500dp</dimen>
+    <dimen name="scroll_distance">4dp</dimen>
+    <dimen name="floor_rect_height">50dp</dimen>
+    <dimen name="distance_between_floors">200dp</dimen>
+    <dimen name="score_margin">4dp</dimen>
+</resources>

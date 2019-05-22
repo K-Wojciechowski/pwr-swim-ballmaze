@@ -7,6 +7,7 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.WindowManager
 
 class MainActivity : AppCompatActivity() {
     private var sensorManager: SensorManager? = null
@@ -20,6 +21,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         gameView = GameView(this)
         setContentView(gameView)
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
 

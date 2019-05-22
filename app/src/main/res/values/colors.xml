@@ -13,22 +13,23 @@
     <color name="win_light">#c4ffc4</color>
     <color name="lose_dark">#400</color>
     <color name="lose_light">#FFAAAA</color>
+
     <color name="floor_01">#C62828</color>
-    <color name="floor_02">#AD1457</color>
-    <color name="floor_03">#6A1B9A</color>
-    <color name="floor_04">#4527A0</color>
-    <color name="floor_05">#283593</color>
-    <color name="floor_06">#1565C0</color>
-    <color name="floor_07">#0277BD</color>
-    <color name="floor_08">#00838F</color>
+    <color name="floor_02">#D84315</color>
+    <color name="floor_03">#EF6C00</color>
+    <color name="floor_04">#FF8F00</color>
+    <color name="floor_05">#F9A825</color>
+    <color name="floor_06">#9E9D24</color>
+    <color name="floor_07">#558B2F</color>
+    <color name="floor_08">#2E7D32</color>
     <color name="floor_09">#00695C</color>
-    <color name="floor_10">#2E7D32</color>
-    <color name="floor_11">#558B2F</color>
-    <color name="floor_12">#9E9D24</color>
-    <color name="floor_13">#F9A825</color>
-    <color name="floor_14">#FF8F00</color>
-    <color name="floor_15">#EF6C00</color>
-    <color name="floor_16">#D84315</color>
+    <color name="floor_10">#00838F</color>
+    <color name="floor_11">#0277BD</color>
+    <color name="floor_12">#1565C0</color>
+    <color name="floor_13">#283593</color>
+    <color name="floor_14">#4527A0</color>
+    <color name="floor_15">#6A1B9A</color>
+    <color name="floor_16">#AD1457</color>
     <array name="floor_colors">
         <item>@color/floor_01</item>
         <item>@color/floor_02</item>

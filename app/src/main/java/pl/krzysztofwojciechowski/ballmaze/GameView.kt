@@ -252,7 +252,7 @@ class GameView internal constructor(context: Context) : SurfaceView(context), Su
         heights[0] = getDim(R.dimen.first_floor_height).toInt()
         for (i in 0 until FLOORS) {
             gaps[i] = getDim(R.dimen.gap_margin_size).toInt() + rand.nextInt(range)
-            colors[i] = colorArray[rand.nextInt(colorArray.size)]
+            colors[i] = colorArray[i % colorArray.size]
             if (i != 0) heights[i] = heights[i - 1] + getDim(R.dimen.distance_between_floors).toInt()
         }
 

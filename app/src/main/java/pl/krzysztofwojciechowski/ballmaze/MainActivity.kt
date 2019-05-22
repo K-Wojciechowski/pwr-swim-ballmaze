@@ -47,6 +47,7 @@ class MainActivity : AppCompatActivity() {
         super.onPause()
         sensorManager!!.unregisterListener(lightSensorListener)
         sensorManager!!.unregisterListener(accelerometerListener)
+        gameView?.stopGame()
     }
 
     internal inner class LightSensorListener : SensorEventListener {

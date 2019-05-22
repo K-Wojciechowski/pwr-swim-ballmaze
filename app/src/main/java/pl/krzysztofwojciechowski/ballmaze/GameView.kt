@@ -61,18 +61,13 @@ class GameView internal constructor(context: Context) : SurfaceView(context), Su
     }
 
     override fun surfaceDestroyed(holder: SurfaceHolder) {
-        mode = GameMode.START
-        try {
-            if (thread != null) thread!!.join()
-        } catch (ignored: InterruptedException) {
-            // That should not fail.
-        }
-
+        stopGame()
     }
 
     private fun draw() {
         if (!holder.surface.isValid) return
         canvas = holder.lockCanvas()
+        if (canvas == null) return
         if (lightValue < DARKMODE_THRESHOLD) {
             canvas!!.drawColor(getColor(R.color.background_dark))
             paint.color = getColor(R.color.foreground_dark)
@@ -264,6 +259,11 @@ class GameView internal constructor(context: Context) : SurfaceView(context), Su
         score = 0
         thread = GameThread()
         thread!!.start()
+    }
+
+    fun stopGame() {
+        mode = GameMode.START
+        if (thread != null) thread!!.join()
     }
 
     // https://stackoverflow.com/a/32081250

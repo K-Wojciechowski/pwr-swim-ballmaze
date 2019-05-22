@@ -80,10 +80,6 @@ class GameView internal constructor(context: Context) : SurfaceView(context), Su
             GameMode.INGAME -> drawInGame(canvas!!)
             GameMode.LOSE -> drawLose(canvas!!)
             GameMode.WIN -> drawWin(canvas!!)
-            else -> {
-                mode = GameMode.START
-                drawStart(canvas!!)
-            }
         }
         holder.unlockCanvasAndPost(canvas)
     }
@@ -267,9 +263,9 @@ class GameView internal constructor(context: Context) : SurfaceView(context), Su
     }
 
     // https://stackoverflow.com/a/32081250
-    private fun drawCenter(canvas: Canvas, paint: Paint, text: String, x: Float, y: Float) {
-        var x = x
-        var y = y
+    private fun drawCenter(canvas: Canvas, paint: Paint, text: String, x_: Float, y_: Float) {
+        var x = x_
+        var y = y_
         val r = canvas.clipBounds
         val cHeight = r.height()
         val cWidth = r.width()
@@ -298,12 +294,9 @@ class GameView internal constructor(context: Context) : SurfaceView(context), Su
     internal inner class GameThread : Thread() {
         override fun run() {
             while (mode === GameMode.INGAME) {
-                try {
-                    runGameTick()
-                    draw()
-                    Thread.sleep(16)
-                } catch (ignored: InterruptedException) {
-                }
+                runGameTick()
+                draw()
+                sleep(16)
 
             }
         }
@@ -320,7 +313,7 @@ class GameView internal constructor(context: Context) : SurfaceView(context), Su
             ballY_px += scrollDist_px
             topY_px += scrollDist_px
             // TODO collision detection
-            if (ballY_px - ballSize_px > heights[score]) {
+            if (ballY_px - (2 * ballSize_px) > heights[score]) {
                 score++
             }
             if (score == FLOORS) {

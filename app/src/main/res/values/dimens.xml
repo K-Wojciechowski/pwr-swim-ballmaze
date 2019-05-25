@@ -18,7 +18,8 @@
     <dimen name="first_floor_height">500dp</dimen>
     <dimen name="scroll_distance">4dp</dimen>
     <dimen name="floor_rect_height">50dp</dimen>
-    <dimen name="gap_width">85dp</dimen>
+    <dimen name="gap_width">95dp</dimen>
     <dimen name="distance_between_floors">250dp</dimen>
     <dimen name="score_margin">4dp</dimen>
+    <dimen name="ball_range_partial">8dp</dimen>
 </resources>

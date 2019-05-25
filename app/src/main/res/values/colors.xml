@@ -7,7 +7,8 @@
     <color name="background_light">#ffffff</color>
     <color name="foreground_dark">#FFFFFF</color>
     <color name="foreground_light">#000000</color>
-    <color name="textshadow">#888</color>
+    <color name="text_shadow">#888</color>
+    <color name="ic_launcher_background">#000000</color>
 
     <color name="win_dark">#003c00</color>
     <color name="win_light">#c4ffc4</color>

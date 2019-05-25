@@ -3,14 +3,16 @@ package pl.krzysztofwojciechowski.ballmaze
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.graphics.Rect
 import android.graphics.Typeface
 import android.text.StaticLayout
 import android.text.TextPaint
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import androidx.core.content.ContextCompat
-
 import java.util.concurrent.ThreadLocalRandom
+
+
 
 class GameView internal constructor(context: Context) : SurfaceView(context), SurfaceHolder.Callback {
     private var canvas: Canvas? = null
@@ -64,6 +66,36 @@ class GameView internal constructor(context: Context) : SurfaceView(context), Su
         stopGame()
     }
 
+    private fun startGame() {
+        mode = GameMode.INGAME
+        val range = (screenWidth.toFloat() - 2 * getDim(R.dimen.gap_margin_size) - gapWidth_px.toFloat() + 1).toInt()
+        val ballRangePartial = getDim(R.dimen.ball_range_partial)
+        val partialRange = (range / ballRangePartial).toInt()
+        val rand = ThreadLocalRandom.current()
+
+        val colorArray = resources.getIntArray(R.array.floor_colors)
+        heights[0] = getDim(R.dimen.first_floor_height).toInt()
+        for (i in 0 until FLOORS) {
+            gaps[i] = getDim(R.dimen.gap_margin_size).toInt() + (rand.nextInt(partialRange) * ballRangePartial).toInt()
+            colors[i] = colorArray[i % colorArray.size]
+            if (i != 0) heights[i] = heights[i - 1] + getDim(R.dimen.distance_between_floors).toInt()
+        }
+
+        maxVisibleFloors = Math.ceil((screenHeight / getDim(R.dimen.distance_between_floors)).toDouble()).toInt()
+
+        ballX_px = ballCentered_px
+        ballY_px = 0
+        topY_px = -ballSize_px
+        score = 0
+        thread = GameThread()
+        thread!!.start()
+    }
+
+    fun stopGame() {
+        mode = GameMode.START
+        if (thread != null) thread!!.join()
+    }
+
     private fun draw() {
         if (!holder.surface.isValid) return
         canvas = holder.lockCanvas()
@@ -84,7 +116,7 @@ class GameView internal constructor(context: Context) : SurfaceView(context), Su
         holder.unlockCanvasAndPost(canvas)
     }
 
-    private fun drawStart(canvas: Canvas?) {
+    private fun computeDimensions() {
         screenWidth = width
         screenHeight = height
         ballCentered_px = screenWidth / 2
@@ -95,23 +127,26 @@ class GameView internal constructor(context: Context) : SurfaceView(context), Su
         maxRightBallPosition_px = screenWidth - minLeftBallPosition_px
         floorRectHeight_px = getDim(R.dimen.floor_rect_height).toInt()
         gapWidth_px = getDim(R.dimen.gap_width).toInt()
+    }
 
-        // Game title
+    private fun drawStart(canvas: Canvas) {
+        // Compute dimensions before game starts
+        computeDimensions()
+
+        // Draw game title
         paint.textSize = getDim(R.dimen.title_size)
-        drawCenter(
-            canvas!!, paint, getString(R.string.app_name), -1f,
-            getDim(R.dimen.title_position)
+        drawCenterX(
+            canvas, paint, getString(R.string.app_name), getDim(R.dimen.title_position)
         )
 
-        // Objective: title
+        // Draw objective title
         paint.textSize = getDim(R.dimen.objective_title_size)
-        drawCenter(
-            canvas, paint, getString(R.string.objective_title), -1f,
-            getDim(R.dimen.objective_title_position)
+        drawCenterX(
+            canvas, paint, getString(R.string.objective_title), getDim(R.dimen.objective_title_position)
         )
 
-        // Objective text content
-        val objective = getString(R.string.objective)
+        // Draw objective text content
+        val objective = resources.getString(R.string.objective, FLOORS)
         val tp = TextPaint()
         tp.textSize = getDim(R.dimen.objective_text_size)
         tp.color = paint.color
@@ -126,19 +161,11 @@ class GameView internal constructor(context: Context) : SurfaceView(context), Su
         paint.textSize = getDim(R.dimen.big_text_size)
         canvas.translate(0f, -objPos)
 
-        // START prompt
+        // Draw START prompt
         val oldtf = paint.typeface
         paint.typeface = Typeface.DEFAULT_BOLD
-        drawCenter(canvas, paint, getString(R.string.tap_to_start), -1f, -1f)
+        drawCenterX(canvas, paint, getString(R.string.tap_to_start), -1f)
         paint.typeface = oldtf
-    }
-
-    private fun getDim(resId: Int): Float {
-        return resources.getDimension(resId)
-    }
-
-    private fun getString(resId: Int): String {
-        return resources.getString(resId)
     }
 
     private fun drawInGame(canvas: Canvas) {
@@ -156,7 +183,7 @@ class GameView internal constructor(context: Context) : SurfaceView(context), Su
         }
 
         // Draw score with shadow
-        paint.color = getColor(R.color.textshadow)
+        paint.color = getColor(R.color.text_shadow)
         canvas.drawText(
             Integer.toString(score),
             getDim(R.dimen.score_margin) + UNIT,
@@ -176,13 +203,15 @@ class GameView internal constructor(context: Context) : SurfaceView(context), Su
     private fun drawAt(height: Int, canvas: Canvas) {
         val top = heights[height] - topY_px
         paint.color = colors[height]
-        canvas.drawRect(0f, top.toFloat(), gaps[height].toFloat(), (top + floorRectHeight_px).toFloat(), paint)
-        canvas.drawRect(
-            (gaps[height] + gapWidth_px).toFloat(),
-            top.toFloat(),
-            screenWidth.toFloat(),
-            (top + floorRectHeight_px).toFloat(),
-            paint
+        val (rectA, rectB) = getRectsFor(top, gaps[height])
+        canvas.drawRect(rectA, paint)
+        canvas.drawRect(rectB, paint)
+    }
+
+    private fun getRectsFor(top: Int, gapDistance: Int): Pair<Rect, Rect> {
+        return Pair(
+            Rect(0, top, gapDistance, top + floorRectHeight_px),
+            Rect(gapDistance + gapWidth_px, top, screenWidth, top + floorRectHeight_px)
         )
     }
 
@@ -209,72 +238,48 @@ class GameView internal constructor(context: Context) : SurfaceView(context), Su
     private fun drawGameOver(canvas: Canvas, wlText: String) {
         // Game title
         paint.textSize = getDim(R.dimen.title_size)
-        drawCenter(
-            canvas, paint, getString(R.string.app_name), -1f,
-            getDim(R.dimen.title_position)
+        drawCenterX(
+            canvas, paint, getString(R.string.app_name), getDim(R.dimen.title_position)
         )
 
         // YOU WON/LOST
         paint.textSize = getDim(R.dimen.big_text_size)
-        drawCenter(
-            canvas, paint, wlText, -1f,
-            getDim(R.dimen.gameover_title_position)
+        drawCenterX(
+            canvas, paint, wlText, getDim(R.dimen.gameover_title_position)
         )
 
         // Score
-        drawCenter(
-            canvas, paint, resources.getString(R.string.score, score), -1f,
-            getDim(R.dimen.gameover_score_position)
+        drawCenterX(
+            canvas, paint, resources.getString(R.string.score, score), getDim(R.dimen.gameover_score_position)
         )
 
         // START prompt
         val oldtf = paint.typeface
         paint.typeface = Typeface.DEFAULT_BOLD
-        drawCenter(canvas, paint, getString(R.string.play_again), -1f, -1f)
+        drawCenterX(canvas, paint, getString(R.string.play_again), -1f)
         paint.typeface = oldtf
     }
 
-    private fun startGame() {
-        mode = GameMode.INGAME
-        val range = (screenWidth.toFloat() - 2 * getDim(R.dimen.gap_margin_size) - gapWidth_px.toFloat() + 1).toInt()
-        val rand = ThreadLocalRandom.current()
-
-        val colorArray = resources.getIntArray(R.array.floor_colors)
-        heights[0] = getDim(R.dimen.first_floor_height).toInt()
-        for (i in 0 until FLOORS) {
-            gaps[i] = getDim(R.dimen.gap_margin_size).toInt() + rand.nextInt(range)
-            colors[i] = colorArray[i % colorArray.size]
-            if (i != 0) heights[i] = heights[i - 1] + getDim(R.dimen.distance_between_floors).toInt()
-        }
-
-        maxVisibleFloors = Math.ceil((screenHeight / getDim(R.dimen.distance_between_floors)).toDouble()).toInt()
-
-        ballX_px = ballCentered_px
-        ballY_px = 0
-        topY_px = -ballSize_px
-        score = 0
-        thread = GameThread()
-        thread!!.start()
-    }
-
-    fun stopGame() {
-        mode = GameMode.START
-        if (thread != null) thread!!.join()
-    }
-
     // https://stackoverflow.com/a/32081250
-    private fun drawCenter(canvas: Canvas, paint: Paint, text: String, x_: Float, y_: Float) {
-        var x = x_
-        var y = y_
+    private fun drawCenterX(canvas: Canvas, paint: Paint, text: String, _y: Float) {
+        var y = _y
         val r = canvas.clipBounds
         val cHeight = r.height()
         val cWidth = r.width()
         paint.textAlign = Paint.Align.LEFT
         paint.getTextBounds(text, 0, text.length, r)
 
-        if (x == -1f) x = cWidth / 2f - r.width() / 2f - r.left.toFloat()
+        val x = cWidth / 2f - r.width() / 2f - r.left.toFloat()
         if (y == -1f) y = cHeight / 2f + r.height() / 2f - r.bottom
         canvas.drawText(text, x, y, paint)
+    }
+
+    private fun getDim(resId: Int): Float {
+        return resources.getDimension(resId)
+    }
+
+    private fun getString(resId: Int): String {
+        return resources.getString(resId)
     }
 
     private fun getColor(colorId: Int): Int {
@@ -312,13 +317,31 @@ class GameView internal constructor(context: Context) : SurfaceView(context), Su
 
             ballY_px += scrollDist_px
             topY_px += scrollDist_px
-            // TODO collision detection
+
+            // Collision detection
+            // The collision will be with the next floor, so floor #score
+            val (rectA, rectB) = getRectsFor(heights[score], gaps[score])
+            val circleRect = getRectForCollisionDetection(ballX_px, ballY_px)
+            if (rectA.intersect(circleRect) || rectB.intersect(circleRect)) {
+                mode = GameMode.LOSE
+            }
+
             if (ballY_px - (2 * ballSize_px) > heights[score]) {
                 score++
             }
             if (score == FLOORS) {
                 mode = GameMode.WIN
             }
+        }
+
+        /** Simplify the ball (circle) into a more forgiving rectangle. */
+        private fun getRectForCollisionDetection(circleX: Int, circleY: Int): Rect {
+            val radius = ballSize_px
+            val rectLeft = circleX - radius + (CD_RECT_X_DIFF * UNIT).toInt()
+            val rectTop = circleY - (radius / CD_RECT_Y_QUOT).toInt() + (CD_RECT_Y_DIFF * UNIT).toInt()
+            val rectRight = circleX + radius - (CD_RECT_X_DIFF * UNIT).toInt()
+            val rectBottom = circleY + (radius / CD_RECT_Y_QUOT).toInt() - (CD_RECT_Y_DIFF * UNIT).toInt()
+            return Rect(rectLeft, rectTop, rectRight, rectBottom)
         }
     }
 }

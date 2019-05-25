@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">BallMaze</string>
     <string name="tap_to_start">START</string>
-    <string name="objective">Tilt your phone left or right to steer the ball through the maze. Pass 50 floors to win. To activate night mode, turn off the lights or cover the light sensor. Have fun!
+    <string name="objective">Tilt your phone left or right to steer the ball through the maze. Pass %1$d floors to win. To activate night mode, turn off the lights or cover the light sensor. Have fun!
     </string>
     <string name="you_won">You won!</string>
     <string name="you_lost">You lost</string>

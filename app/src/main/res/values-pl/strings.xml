@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">BallMaze</string>
-    <string name="objective">Pochyl telefon w lewo lub w prawo aby pokierować piłkę przez labirynt. Przejdź 50 poziomów, aby wygrać. Aby aktywować tryb nocny, zgaś światło lub zasłoń czujnik światła. Miłej zabawy!
+    <string name="objective">Pochyl telefon w lewo lub w prawo aby pokierować piłkę przez labirynt. Przejdź %1$d poziomów, aby wygrać. Aby aktywować tryb nocny, zgaś światło lub zasłoń czujnik światła. Miłej zabawy!
     </string>
     <string name="objective_title">Cel gry:</string>
     <string name="play_again">JESZCZE RAZ</string>
